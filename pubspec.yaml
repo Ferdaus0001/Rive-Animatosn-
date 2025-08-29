@@ -37,7 +37,8 @@ dependencies:
   rive: ^0.13.20
   percent_indicator: ^4.2.5
   confetti: ^0.8.0
-  get: 
+  get:
+  audioplayers:
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +66,7 @@ flutter:
   assets:
      - assets/image/
      - assets/rive/
+     - assets/soung/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -184,13 +184,13 @@
 
 
 
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:rive/rive.dart' hide LinearGradient;
 import 'package:confetti/confetti.dart';
+import 'package:audioplayers/audioplayers.dart'; // <-- Music Import
 
 class PlantScreen extends StatefulWidget {
   const PlantScreen({super.key});
@@ -221,6 +221,9 @@ class _PlantScreenState extends State<PlantScreen>
   late AnimationController _buttonController;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _fadeAnimation;
+
+  // Audio player
+  final AudioPlayer _audioPlayer = AudioPlayer(); // <-- Add music player
 
   @override
   void initState() {
@@ -272,6 +275,9 @@ class _PlantScreenState extends State<PlantScreen>
   }
 
   void _startOrResetGrowing() {
+    // Play background music once
+    _playBackgroundMusic();
+
     if (_treeProgress >= _treeMaxProgress) {
       _timer?.cancel();
       setState(() {
@@ -317,12 +323,22 @@ class _PlantScreenState extends State<PlantScreen>
     });
   }
 
+  void _playBackgroundMusic() async {
+    try {
+      await _audioPlayer.setReleaseMode(ReleaseMode.loop); // Loop music
+      await _audioPlayer.play(AssetSource('assets/image/soundTow.mp3'));
+    } catch (e) {
+      debugPrint('❌ Error playing music: $e');
+    }
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
     _controller?.dispose();
     _confettiController.dispose();
     _buttonController.dispose();
+    _audioPlayer.dispose(); // Dispose audio player
     super.dispose();
   }
 
