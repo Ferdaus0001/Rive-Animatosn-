@@ -212,7 +212,7 @@ class _PlantScreenState extends State<PlantScreen> {
   Timer? _timer;
 
   // Timer options in seconds (3, 10, 15, 20 minutes)
-  final List<int> _timerOptions = [180, 600, 900, 1200];
+  final List<int> _timerOptions = [180, 600, 900, 1200, 1500,1800,2400,2700,3000];
 
   // Selected time from dropdown, initialized with the first option
   late int _selectedTimeInSeconds;
