@@ -185,8 +185,6 @@
 
 
 
-
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -201,41 +199,59 @@ class PlantScreen extends StatefulWidget {
   _PlantScreenState createState() => _PlantScreenState();
 }
 
-class _PlantScreenState extends State<PlantScreen> {
+class _PlantScreenState extends State<PlantScreen>
+    with SingleTickerProviderStateMixin {
   Artboard? _riveArtboard;
   StateMachineController? _controller;
   SMIInput<double>? _progress;
   String plantButtonText = "Start Growing";
 
-  int _treeProgress = 0; // Current progress (0–100%)
-  final int _treeMaxProgress = 100; // Maximum growth (100%)
+  int _treeProgress = 0;
+  final int _treeMaxProgress = 100;
   Timer? _timer;
 
-  // Timer options in seconds (3, 10, 15, 20 minutes)
-  final List<int> _timerOptions = [180, 600, 900, 1200, 1500,1800,2400,2700,3000];
-
-  // Selected time from dropdown, initialized with the first option
+  final List<int> _timerOptions = [60,180, 600, 900, 1200, 1500, 1800, 2400, 2700, 3000];
   late int _selectedTimeInSeconds;
   bool _isTimerRunning = false;
-
-  // Remaining time in seconds
   int _remainingTimeInSeconds = 0;
 
   late ConfettiController _confettiController;
 
+  // Button animation controller
+  late AnimationController _buttonController;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
 
-    // Initialize selected time and remaining time with the first option
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 2));
+
     _selectedTimeInSeconds = _timerOptions.first;
     _remainingTimeInSeconds = _selectedTimeInSeconds;
 
     _loadRiveFile();
+
+    // Button animation
+    _buttonController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 1));
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 1), // নিচ থেকে আসবে
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _buttonController, curve: Curves.easeOut));
+
+    _fadeAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _buttonController, curve: Curves.easeIn));
+
+    // Animate button only once
+    _buttonController.forward();
   }
 
-  // Load the Rive animation file
   Future<void> _loadRiveFile() async {
     try {
       final data = await rootBundle.load('assets/rive/pomodoro_tree.riv');
@@ -255,10 +271,8 @@ class _PlantScreenState extends State<PlantScreen> {
     }
   }
 
-  // Start or reset plant growth
   void _startOrResetGrowing() {
     if (_treeProgress >= _treeMaxProgress) {
-      // If already full grown, reset everything
       _timer?.cancel();
       setState(() {
         _treeProgress = 0;
@@ -270,7 +284,7 @@ class _PlantScreenState extends State<PlantScreen> {
       return;
     }
 
-    if (_isTimerRunning) return; // Prevent multiple timers
+    if (_isTimerRunning) return;
 
     setState(() {
       plantButtonText = "Growing...";
@@ -279,11 +293,10 @@ class _PlantScreenState extends State<PlantScreen> {
 
     _timer?.cancel();
 
-    const intervalMs = 1000; // 1 second
+    const intervalMs = 1000;
     _timer = Timer.periodic(const Duration(milliseconds: intervalMs), (timer) {
       setState(() {
         if (_remainingTimeInSeconds <= 0) {
-          // When time is finished, mark plant as fully grown
           _treeProgress = _treeMaxProgress;
           _progress?.value = _treeProgress.toDouble();
           plantButtonText = "Plant Fully Grown";
@@ -292,12 +305,12 @@ class _PlantScreenState extends State<PlantScreen> {
           _remainingTimeInSeconds = 0;
           timer.cancel();
         } else {
-          // Decrease remaining time and update tree progress
           _remainingTimeInSeconds--;
-          _treeProgress = ((_selectedTimeInSeconds - _remainingTimeInSeconds) /
-              _selectedTimeInSeconds *
-              _treeMaxProgress)
-              .round();
+          _treeProgress =
+              ((_selectedTimeInSeconds - _remainingTimeInSeconds) /
+                  _selectedTimeInSeconds *
+                  _treeMaxProgress)
+                  .round();
           _progress?.value = _treeProgress.toDouble();
         }
       });
@@ -309,15 +322,13 @@ class _PlantScreenState extends State<PlantScreen> {
     _timer?.cancel();
     _controller?.dispose();
     _confettiController.dispose();
+    _buttonController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Tree size will be based on screen width
     double treeVisualSize = MediaQuery.of(context).size.width - 40;
-
-    // Progress percentage for circular indicator
     double displayedPercent = _treeProgress / _treeMaxProgress;
     Color percentColor =
     _treeProgress >= _treeMaxProgress ? Colors.green : Colors.deepOrange;
@@ -328,19 +339,17 @@ class _PlantScreenState extends State<PlantScreen> {
         children: [
           LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
-              // Fixed height for non-Rive widgets
-              double fixedWidgetsHeight = 60 + // Top padding
-                  20 + // Dropdown vertical padding
+              double fixedWidgetsHeight = 60 +
+                  20 +
                   (Theme.of(context).textTheme.titleMedium?.fontSize ?? 16) +
-                  20 + // Dropdown approx height + padding
-                  10 + // Time left text padding
+                  20 +
+                  10 +
                   (Theme.of(context).textTheme.displayLarge?.fontSize ?? 30) +
-                  30 + // "Time left to grow..." padding
+                  30 +
                   (Theme.of(context).textTheme.bodySmall?.fontSize ?? 10) +
-                  100 + // Button bottom padding
-                  40; // Button height
+                  100 +
+                  40;
 
-              // Available height for Rive section
               double availableHeightForRive =
                   constraints.maxHeight - fixedWidgetsHeight;
 
@@ -349,7 +358,6 @@ class _PlantScreenState extends State<PlantScreen> {
                   ? availableHeightForRive
                   : treeVisualSize;
 
-              // Ensure it never goes below treeVisualSize
               if (riveSectionHeight < treeVisualSize) {
                 riveSectionHeight = treeVisualSize;
               }
@@ -374,7 +382,7 @@ class _PlantScreenState extends State<PlantScreen> {
                         ),
                       ),
 
-                      // Timer dropdown menu
+                      // Timer dropdown
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         child: Container(
@@ -428,7 +436,7 @@ class _PlantScreenState extends State<PlantScreen> {
                         ),
                       ),
 
-                      // Circular tree growth with Rive
+                      // Rive tree with circular progress
                       SizedBox(
                         height: riveSectionHeight - 20,
                         child: Center(
@@ -479,60 +487,68 @@ class _PlantScreenState extends State<PlantScreen> {
                         ),
                       ),
 
-                      // Start/Reset button
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            bottom: 100, left: 50, right: 50, top: 5),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(200, 45), // Width + Height মোটা করা হলো
-                            backgroundColor: Colors.transparent,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20.0), // আরেকটু round
-                            ),
-                            elevation: 12,
-                            shadowColor: Colors.green.withOpacity(0.6),
-                            padding: EdgeInsets.zero,
-                          ).copyWith(
-                            backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                            overlayColor:
-                            MaterialStateProperty.all(Colors.white.withOpacity(0.2)),
-                            surfaceTintColor: MaterialStateProperty.all(Colors.transparent),
-                          ),
-                          onPressed: _startOrResetGrowing,
-                          child: Ink(
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Colors.green, Colors.teal],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
+                      // Animated Start/Reset button
+                      SlideTransition(
+                        position: _slideAnimation,
+                        child: FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                bottom: 100, left: 50, right: 50, top: 5),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(200, 45),
+                                backgroundColor: Colors.transparent,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20.0),
+                                ),
+                                elevation: 12,
+                                shadowColor: Colors.green.withOpacity(0.6),
+                                padding: EdgeInsets.zero,
+                              ).copyWith(
+                                backgroundColor:
+                                MaterialStateProperty.all(Colors.transparent),
+                                overlayColor: MaterialStateProperty.all(
+                                    Colors.white.withOpacity(0.2)),
+                                surfaceTintColor:
+                                MaterialStateProperty.all(Colors.transparent),
                               ),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Container(
-                              height: 65, // মোটা বোতামের জন্য নির্দিষ্ট height
-                              alignment: Alignment.center,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.local_florist,
-                                    color: Colors.white,
-                                    size: 24, // Icon size বড়
+                              onPressed: _startOrResetGrowing,
+                              child: Ink(
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [Colors.green, Colors.teal],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
                                   ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    plantButtonText,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18, // Font size বড়
-                                      fontWeight: FontWeight.bold, // আরও strong look
-                                      letterSpacing: 1.5,
-                                    ),
+                                  borderRadius: BorderRadius.circular(20.0),
+                                ),
+                                child: Container(
+                                  height: 65,
+                                  alignment: Alignment.center,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.local_florist,
+                                        color: Colors.white,
+                                        size: 24,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Text(
+                                        plantButtonText,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1.5,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
@@ -545,18 +561,18 @@ class _PlantScreenState extends State<PlantScreen> {
             },
           ),
 
-          // Confetti effect when fully grown
+          // Confetti effect
           Align(
             alignment: Alignment.topCenter,
             child: ConfettiWidget(
               confettiController: _confettiController,
-              blastDirectionality: BlastDirectionality.explosive, // চারদিকে ছড়াবে
+              blastDirectionality: BlastDirectionality.explosive,
               shouldLoop: false,
-              emissionFrequency: 0.1, // ঘন ঘন confetti (0.1 মানে প্রতি সেকেন্ডে ১০ বার emit)
-              numberOfParticles: 50, // একসাথে ৫০ টা confetti
-              maxBlastForce: 20, // বেশি জোর
-              minBlastForce: 10, // ন্যূনতম জোর
-              gravity: 0.2, // নিচে পড়ার স্পিড
+              emissionFrequency: 0.1,
+              numberOfParticles: 50,
+              maxBlastForce: 20,
+              minBlastForce: 10,
+              gravity: 0.2,
               colors: const [
                 Colors.green,
                 Colors.blue,
@@ -573,13 +589,8 @@ class _PlantScreenState extends State<PlantScreen> {
   }
 }
 
-// Converts integer (seconds) into MM:SS format
 String intToTimeLeft(int value) {
   int m = value ~/ 60;
   int s = value % 60;
-
-  String minuteLeft = m.toString().padLeft(2, '0');
-  String secondsLeft = s.toString().padLeft(2, '0');
-
-  return "$minuteLeft:$secondsLeft";
+  return "${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}";
 }
