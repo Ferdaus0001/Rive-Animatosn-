@@ -191,7 +191,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-import 'package:rive/rive.dart';
+import 'package:rive/rive.dart' hide LinearGradient;
 import 'package:confetti/confetti.dart';
 
 class PlantScreen extends StatefulWidget {
@@ -481,20 +481,60 @@ class _PlantScreenState extends State<PlantScreen> {
 
                       // Start/Reset button
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 100),
+                        padding: const EdgeInsets.only(
+                            bottom: 100, left: 50, right: 50, top: 5),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            minimumSize: const Size(180, 40),
-                            backgroundColor: Colors.green,
+                            minimumSize: const Size(200, 45), // Width + Height মোটা করা হলো
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
+                              borderRadius: BorderRadius.circular(20.0), // আরেকটু round
                             ),
-                            elevation: 8,
+                            elevation: 12,
+                            shadowColor: Colors.green.withOpacity(0.6),
+                            padding: EdgeInsets.zero,
+                          ).copyWith(
+                            backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                            overlayColor:
+                            MaterialStateProperty.all(Colors.white.withOpacity(0.2)),
+                            surfaceTintColor: MaterialStateProperty.all(Colors.transparent),
                           ),
                           onPressed: _startOrResetGrowing,
-                          child: Text(
-                            plantButtonText,
-                            style: const TextStyle(color: Colors.white),
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Colors.green, Colors.teal],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            child: Container(
+                              height: 65, // মোটা বোতামের জন্য নির্দিষ্ট height
+                              alignment: Alignment.center,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.local_florist,
+                                    color: Colors.white,
+                                    size: 24, // Icon size বড়
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    plantButtonText,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18, // Font size বড়
+                                      fontWeight: FontWeight.bold, // আরও strong look
+                                      letterSpacing: 1.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -510,9 +550,21 @@ class _PlantScreenState extends State<PlantScreen> {
             alignment: Alignment.topCenter,
             child: ConfettiWidget(
               confettiController: _confettiController,
-              blastDirectionality: BlastDirectionality.explosive,
+              blastDirectionality: BlastDirectionality.explosive, // চারদিকে ছড়াবে
               shouldLoop: false,
-              colors: const [Colors.green, Colors.blue, Colors.yellow, Colors.red],
+              emissionFrequency: 0.1, // ঘন ঘন confetti (0.1 মানে প্রতি সেকেন্ডে ১০ বার emit)
+              numberOfParticles: 50, // একসাথে ৫০ টা confetti
+              maxBlastForce: 20, // বেশি জোর
+              minBlastForce: 10, // ন্যূনতম জোর
+              gravity: 0.2, // নিচে পড়ার স্পিড
+              colors: const [
+                Colors.green,
+                Colors.blue,
+                Colors.yellow,
+                Colors.red,
+                Colors.purple,
+                Colors.orange,
+              ],
             ),
           ),
         ],

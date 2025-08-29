@@ -37,6 +37,7 @@ dependencies:
   rive: ^0.13.20
   percent_indicator: ^4.2.5
   confetti: ^0.8.0
+  get: 
 
 dev_dependencies:
   flutter_test:
