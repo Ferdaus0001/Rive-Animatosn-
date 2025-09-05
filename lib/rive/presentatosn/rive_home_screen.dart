@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive/rive.dart';
 
-class RiveHomeScreen extends StatefulWidget {
-  const RiveHomeScreen({super.key});
+class RiveFireScreen extends StatefulWidget {
+  const RiveFireScreen({super.key});
 
   @override
-  State<RiveHomeScreen> createState() => _RiveHomeScreenState();
+  State<RiveFireScreen> createState() => _RiveFireScreenState();
 }
 
-class _RiveHomeScreenState extends State<RiveHomeScreen> {
+class _RiveFireScreenState extends State<RiveFireScreen> {
   StateMachineController? _stateMachineController;
   Artboard? _riveArtboard;
   SMIInput<bool>? _onInput; // Renamed from _fireInput to match the correct input
