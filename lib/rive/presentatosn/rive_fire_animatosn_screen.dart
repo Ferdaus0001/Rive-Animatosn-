@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:rive/rive.dart';
 
 class RiveFireScreen extends StatefulWidget {
@@ -85,7 +86,7 @@ class _RiveFireScreenState extends State<RiveFireScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding:   EdgeInsets.all(16.0.sp),
         child: Center(
           child: _riveArtboard == null
               ? const CircularProgressIndicator()

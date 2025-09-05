@@ -1,14 +1,20 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'package:rive/rive.dart'; // Import Rive package
-
+import 'package:rive/rive.dart'; // Rive package
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // ScreenUtil import
 import 'package:rive_animation/splash_screen/splash_screen.dart'; // Fixed typo in path
 
 void main() async {
-  // Ensure widgets are initialized and Rive is set up
   WidgetsFlutterBinding.ensureInitialized();
   await RiveFile.initialize(); // Initialize Rive runtime
-  runApp(const MyApp());
+  runApp(
+       const MyApp()
+  //   DevicePreview(
+  //   enabled: true,
+  //   builder: (context) => const MyApp(),
+  // ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -16,13 +22,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home:   SplashScreen(),
+    return ScreenUtilInit(
+      designSize: const Size(390, 844), // Design screen size (width x height)
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Responsive Rive App',
+          home: SplashScreen(),
+        );
+      },
     );
   }
 }
